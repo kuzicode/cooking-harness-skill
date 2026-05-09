@@ -1,32 +1,50 @@
 ---
 name: init-harness
-description: Bootstrap project harness (AGENTS.md + docs/ scaffold) for a new or unstructured project. Use when user asks to "初始化项目 harness / 搭建工程规范 / 项目骨架 / new project setup / set up project guidelines / 整理 docs / 初始化文档结构". Copies opinionated templates and fills in project-specific placeholders so future AI sessions have low-context, high-clarity rules.
+description: Bootstrap a project harness with AGENTS.md, optional CLAUDE.md pointer, and docs/ scaffold. Use when the user asks to initialize project guidelines, set up an agent harness, create AGENTS.md, organize project docs, or add Research → Plan → Build workflow files for Codex / Claude Code / Cursor / Copilot.
 ---
 
 # init-harness
 
-## When to invoke
-- 新项目目录，无 `AGENTS.md` / `docs/plan.md`
-- 现有项目想换装这套 harness（先列出冲突文件，询问用户覆盖 / 跳过 / 合并）
-- 用户明确说"搭骨架 / init harness / 整理工程文档 / 初始化规范"
+Create a small, vendor-neutral project harness so future AI sessions can start from `AGENTS.md` and `docs/plan.md` instead of rediscovering project rules.
+
+## When to Invoke
+
+- 新项目目录没有 `AGENTS.md` / `docs/plan.md`。
+- 现有项目想换装这套 harness。
+- 用户明确说"初始化 harness / 搭建工程规范 / 项目骨架 / 整理 docs / create AGENTS.md / project guidelines"。
 
 ## Workflow
 
-### Step 1 — 冲突检查
-检查当前目录是否已有：`AGENTS.md`, `CLAUDE.md`, `docs/plan.md`, `docs/conventions.md`, `docs/issues.md`, `docs/architecture.md`, `docs/pm-overview.md`。
-- 若任一存在 → 列出冲突文件，询问：覆盖 / 跳过已存在文件 / 逐文件确认？
-- 若全部不存在 → 直接进入 Step 2
+### Step 1 — Conflict Check
 
-### Step 2 — 收集基本信息（AskUserQuestion）
-问以下信息（可一次多问）：
-1. 项目名（`{{PROJECT_NAME}}`，如 `KBOT` / `a-share`）
-2. 一句话定位（`{{TAGLINE}}`，如"浏览器端多链钱包管理工具"）
-3. 技术栈关键字（`{{STACK}}`，如"Next.js 15 · TypeScript · pnpm · viem"）
-4. owner（`{{OWNER}}`，如 `kumata`）
-5. 今天日期（`{{TODAY}}`，如 `2026-05-09`，可用 `date` 命令自动填）
+检查当前目录是否已有这些文件：
 
-### Step 3 — 写入文件
-从 `~/.claude/skills/init-harness/templates/` 复制并替换 placeholder，落地到当前工作目录：
+- `AGENTS.md`
+- `CLAUDE.md`
+- `docs/plan.md`
+- `docs/plan-archive.md`
+- `docs/architecture.md`
+- `docs/conventions.md`
+- `docs/issues.md`
+- `docs/pm-overview.md`
+
+若任一存在，列出冲突文件并询问用户选择：覆盖、跳过已存在文件、或逐文件确认。未得到确认前不要覆盖。
+
+### Step 2 — Collect Project Facts
+
+一次性询问缺失信息；能从仓库确定的不要重复问：
+
+- 项目名：`{{PROJECT_NAME}}`
+- 一句话定位：`{{TAGLINE}}`
+- 技术栈关键字：`{{STACK}}`
+- owner：`{{OWNER}}`
+- 日期：`{{TODAY}}`，可用本地日期
+
+Codex 下如果没有专用提问工具，直接用一段简短文字向用户提问。
+
+### Step 3 — Write Files
+
+从 skill 目录的 `templates/` 复制并替换 placeholder：
 
 | 模板文件 | 落地路径 |
 |---|---|
@@ -39,25 +57,29 @@ description: Bootstrap project harness (AGENTS.md + docs/ scaffold) for a new or
 | `templates/docs/issues.md` | `./docs/issues.md` |
 | `templates/docs/pm-overview.md` | `./docs/pm-overview.md` |
 
-Placeholder 替换：`{{PROJECT_NAME}}` `{{TAGLINE}}` `{{STACK}}` `{{OWNER}}` `{{TODAY}}`
+Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`{{TODAY}}`。
 
-### Step 4 — 落地后提示
-告知用户下一步应手动补充的内容：
-1. `AGENTS.md` → 编辑"硬性规则"：WF 组是通用占位，按项目领域追加专属分组（SEC / TX / DATA / UI 等），每条规则用 `前缀+数字` 格式（WF1 / SEC2 / TX3）
-2. `docs/plan.md` → 填入首个里程碑（M1 目标 / 验收条件）
-3. `docs/conventions.md` → 删除不适用的占位条目，补充项目特有约定
-4. `docs/architecture.md` → 按实际技术选型填充各章节
-5. 询问用户 `docs/` 是否需要加入 `.gitignore`
+### Step 4 — Post-Setup Guidance
 
-### Step 5 — 禁止事项
-- 不跑任何构建 / git 命令
-- 不替用户写业务代码
-- 不安装依赖
+落地后提示用户补充：
 
-## Harness 约定（供 AI 执行时遵循）
+1. `AGENTS.md`：把通用 WF 规则扩展成项目专属编号规则，例如 `SEC1`、`DATA2`、`TX3`。
+2. `docs/plan.md`：填入首个活跃里程碑和验收条件。
+3. `docs/conventions.md`：删除不适用占位，补充项目技术约定。
+4. `docs/architecture.md`：按实际架构补齐模块边界。
+5. 询问 `docs/` 是否入仓；私有个人 harness 可 ignore，协作项目或设计权威建议入仓。
 
-- **编号硬规**：每条规则 `<前缀><数字>`（WF1 / SEC2 / TX3），便于 review 时精确引用
-- **frontmatter**：每个 docs/ 文件必带 `last_updated / status / owner`
-- **plan.md ≤ 100 行**：超过时将已完成里程碑迁入 `plan-archive.md`
-- **issues.md ISS-XXX**：五段式（日期 / 现象 / 根因 / 方案 / 经验），状态 `open / resolved / superseded`
-- **AGENTS.md ≤ 140 行**：快速导航表 + 硬规 + 技术栈 + 目录树 + 命令，不写大段叙述
+### Step 5 — Guardrails
+
+- 不跑构建、测试、部署或 git 命令，除非用户明确要求。
+- 不安装依赖。
+- 不写业务代码。
+- 不覆盖已有文件，除非用户已确认。
+
+## Harness Conventions
+
+- **编号硬规**：每条硬规则使用 `<前缀><数字>`，例如 `WF1` / `SEC2` / `TX3`。
+- **frontmatter**：docs 文件带 `last_updated / status / owner`。
+- **plan.md**：只放活跃迭代和待办；完成历史迁入 `plan-archive.md`。
+- **issues.md**：使用 `ISS-XXX`，记录日期、现象、根因、方案、经验，状态为 `open / resolved / superseded`。
+- **AGENTS.md**：保持短、可扫读，包含快速导航、硬规、技术栈、目录、常用命令。
