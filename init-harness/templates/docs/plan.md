@@ -33,6 +33,8 @@ status: active
 
 ## 待办 / Backlog
 
+<!-- 超过一个里程碑周期未动的行，重新分诊或迁入 plan-archive.md，不留僵尸行 -->
+
 | 优先级 | 功能 | 说明 |
 |---|---|---|
 | 🟡 中 | [功能名] | [简要说明] |
@@ -41,5 +43,7 @@ status: active
 
 ## 文档同步 TODO
 
-- [ ] 首个里程碑完成后填写 `docs/architecture.md`
+<!-- 只写绝对日期 YYYY-MM-DD（HM4）；不引用仓库外路径（HM5）；引用问题只写 ISS-XXX 不复述状态（HM6） -->
+
 - [ ] 约定确认后更新 `docs/conventions.md`
+- [ ] docs/ 结构变化后按 HM1 刷新 AGENTS.md 导航表与目录树

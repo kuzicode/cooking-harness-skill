@@ -1,7 +1,7 @@
 interface:
   display_name: "Init Harness"
-  short_description: "Scaffold AGENTS.md and project docs"
-  default_prompt: "Use $init-harness to create a project AGENTS.md and docs/ planning scaffold."
+  short_description: "Scaffold AGENTS.md and project docs; doctor mode audits an existing harness for drift"
+  default_prompt: "Use $init-harness to create a project AGENTS.md and docs/ planning scaffold, or to run a doctor audit on an existing harness."
 
 policy:
   allow_implicit_invocation: true
