@@ -95,8 +95,8 @@ Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`
 
 ## Harness Conventions
 
-- **编号硬规**：每条硬规则使用 `<前缀><数字>`，例如 `WF1` / `SEC2` / `TX3`。内置两组：WF（工作流：plan 门槛、踩坑记录、worktree 隔离、完成前验证门——宣称完成必须先跑证明命令；关键规则带反合理化措辞）+ HM（harness 自维护：docs 变动同步导航、frontmatter 刷新、绝对日期、禁仓外引用、issues.md 为状态唯一权威）。
+- **编号硬规**：每条硬规则使用 `<前缀><数字>`，例如 `WF1` / `SEC2` / `TX3`。内置两组：WF（工作流：plan 门槛、踩坑记录、worktree 隔离、完成前验证门——宣称完成必须先跑证明命令；关键规则带反合理化措辞）+ HM（harness 自维护：docs 变动同步导航、frontmatter 刷新、绝对日期、禁仓外引用、issues.md 为状态唯一权威、AGENTS.md ≤150 行常载预算）。
 - **frontmatter**：docs 文件带 `last_updated / status`；AGENTS.md 另带 `owner / harness_version`。
 - **plan.md**：只放活跃迭代和待办（≤100 行）；完成历史迁入 `plan-archive.md`；引用问题只写 `ISS-XXX` 链接，不复述状态。
-- **issues.md**：头部索引表（ID / 状态 / 一句话 / 位置）；正文 newest-first；新 ID = 索引最大编号 + 1；正文 >300 行或 resolved >15 条时最旧 resolved 迁 `issues-archive.md`；条目五段式（日期 / 现象 / 根因 / 方案 / 经验），状态 `open / resolved / superseded`；经验二次命中即升级为 conventions.md 条目或 AGENTS.md 硬规（经验的终点是规则，不是档案）。
-- **AGENTS.md**：保持短、可扫读，包含快速导航（含加载分层：常读 / 按需 / 默认不读）、硬规、技术栈、目录、常用命令。这是唯一常载文件，任何新增内容先问"值得每个会话都付这份 token 吗"。
+- **issues.md**：头部索引表（ID / 状态 / 一句话 / 位置）；正文 newest-first；新 ID = 索引最大编号 + 1；正文 >200 行或 resolved >15 条时最旧 resolved 迁 `issues-archive.md`；查阅先索引后单条，不整文件读；条目五段式（日期 / 现象 / 根因 / 方案 / 经验），状态 `open / resolved / superseded`；经验二次命中即升级为 conventions.md 条目或 AGENTS.md 硬规（经验的终点是规则，不是档案）。
+- **AGENTS.md**：保持短、可扫读（≤150 行，HM7），包含快速导航（含加载分层：常读 / 按需 / 默认不读）、硬规、技术栈、目录、常用命令。这是唯一常载文件，任何新增内容先问"值得每个会话都付这份 token 吗"；单个规则组超过 6 条时细则下沉 conventions.md。

@@ -2,7 +2,7 @@
 last_updated: {{TODAY}}
 status: active
 owner: {{OWNER}}
-harness_version: 3
+harness_version: 4
 ---
 
 # {{PROJECT_NAME}} — Agent Guidelines
@@ -24,6 +24,7 @@ harness_version: 3
 | 产品视图（面向 PM） | `docs/pm-overview.md` | 按需 |
 
 > `docs/` 允许按主题增设子目录（如 `design/`、`strategies/`、`reference/`）；新增即按 HM1 补导航行。
+> 查 `issues.md` 先读头部索引表，再按 `## ISS-XXX` 定位读单条，不整文件读。
 
 ---
 
@@ -46,6 +47,7 @@ harness_version: 3
 - **HM4** 文档只写绝对日期 `YYYY-MM-DD`，禁止"今晚 / 明天 / T+1 后"类相对时间
 - **HM5** `docs/` 不得引用仓库外路径（如 `~/.claude/plans/...`）作为权威内容；需要就把内容摘要进仓
 - **HM6** 问题状态的唯一权威是 `docs/issues.md`；`plan.md` 只链接 `ISS-XXX`，不复述其状态
+- **HM7** 常载预算：本文件 ≤ 150 行；单个领域规则组超过 6 条时，细则下沉到 `docs/conventions.md` 或专属文档，此处只留组名 + 一行摘要 + 链接。本文件是唯一常载文件，每多一行所有会话都要付费
 
 <!-- 按项目领域在此添加专属规则分组，例如：
 

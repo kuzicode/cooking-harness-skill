@@ -7,12 +7,14 @@ status: active
 
 每次解决一个非平凡 bug / 踩坑 / 设计反复后追加一条。
 
+**查阅规则**：先读头部索引表，再按 `## ISS-XXX` 定位读单条，不整文件读。
+
 **维护规则**（agent 必读）：
 
 1. **新 ID = 索引表最大编号 + 1**。先查索引表再追加，禁止凭记忆编号。
 2. 正文一律 **newest-first**：新条目插在索引表之后的第一个位置。
 3. 每次增改条目，同步更新索引表对应行。
-4. **归档阈值**：正文超过 ~300 行或 resolved 条目超过 ~15 条 → 将最旧的 resolved 条目整体迁入 `issues-archive.md`，索引行保留、位置改 `archive`。`open` / `superseded` 条目永不归档。
+4. **归档阈值**：正文超过 ~200 行或 resolved 条目超过 ~15 条 → 将最旧的 resolved 条目整体迁入 `issues-archive.md`，索引行保留、位置改 `archive`。`open` / `superseded` 条目永不归档。
 5. 状态：`open` / `resolved` / `superseded`。本文件是问题状态的唯一权威（HM6）。
 6. **经验升级**：同类坑第二次踩中、或某条「经验」被第二次引用 → 把它提炼为 `docs/conventions.md` 条目或 AGENTS.md 编号硬规，并在原条目「经验」行尾标注 `（已升级 → 位置）`。经验的终点是规则，不是档案。
 

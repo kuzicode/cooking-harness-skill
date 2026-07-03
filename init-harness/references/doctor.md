@@ -9,7 +9,7 @@
 - **重复 ID**：`grep -oE '^## ISS-[0-9]+' docs/issues.md docs/issues-archive.md 2>/dev/null | sort | uniq -d` → 应为空。命中则建议：较新条目重编号为最大编号+1，并同步其在 plan.md / 其他 ISS 内的交叉引用。
 - **排序**：正文前两个 `## ISS-` 编号应递减（newest-first）。混序则建议一次性重排。
 - **索引对齐**：索引表的 ID 集合与正文 + archive 的 `## ISS-` 标题集合应双向一致（无索引缺行、无幽灵行）。
-- **归档阈值**：正文 > 300 行或 resolved 条目 > 15 条 → 建议将最旧 resolved 迁 `issues-archive.md`。
+- **归档阈值**：正文 > 200 行或 resolved 条目 > 15 条 → 建议将最旧 resolved 迁 `issues-archive.md`。
 
 ## D2 — 跨文件状态一致
 
@@ -27,6 +27,7 @@
 - **仓外引用**：`grep -nE '~/\.claude|~/\.codex|/Users/|/home/' AGENTS.md docs/*.md` → 命中即违反 HM5，建议把内容摘要进仓或删除引用（排除 HM5 规则行自身的示例文本这一固定误报）。
 - **相对时间词**：`grep -nE '今晚|今早|明早|明天|后天|下周|T\+1 后' docs/plan.md` → 命中即违反 HM4（人工排除"下周期"类误报），建议改绝对日期或清理过期项。
 - **plan.md 长度**：`wc -l docs/plan.md` > 100 → 建议完成章节迁 plan-archive.md。
+- **常读层预算**：`wc -l AGENTS.md docs/plan.md` → AGENTS.md > 150 行，或两者合计 > 250 行 → 违反 HM7，建议规则细则下沉 `conventions.md`、完成项迁 `plan-archive.md`；顺带检查是否有单个规则组 > 6 条。
 - **frontmatter 缺失**：docs 下每个 md 应有 `last_updated` frontmatter。
 
 ## D5 — 可选项
