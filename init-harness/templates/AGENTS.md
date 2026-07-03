@@ -2,7 +2,7 @@
 last_updated: {{TODAY}}
 status: active
 owner: {{OWNER}}
-harness_version: 2
+harness_version: 3
 ---
 
 # {{PROJECT_NAME}} — Agent Guidelines
@@ -31,11 +31,12 @@ harness_version: 2
 
 ### WF — 工作流 (Workflow)
 
-- **WF1** > 5 个文件或非一行改动，先更新 `docs/plan.md` 再动手（Research → Plan → Build）
-- **WF2** 解决一个非平凡 bug 后追加 `docs/issues.md` 一条 ISS-XXX（踩过两次的坑必须记）
+- **WF1** > 5 个文件或非一行改动，先更新 `docs/plan.md` 再动手（Research → Plan → Build）。不可协商。"这次改动很小，不用更新 plan" 不成立——阈值就是为"很小"的误判设的
+- **WF2** 解决一个非平凡 bug 后立即追加 `docs/issues.md` 一条 ISS-XXX。"这个坑太琐碎不值得记" 不成立——踩过两次的坑必须记，而你无法预知哪个坑会被踩第二次
 - **WF3** 改动 > 500 行后主动问用户："有什么值得记入 memory 的经验？"
 - **WF4** 破坏性改动用 worktree 隔离，review 后再合并
-- **WF5** [根据项目需要追加，如"不主动运行 deploy.sh，提示用户手动执行"]
+- **WF5** 宣称"完成 / 修好了 / 测试通过"之前，必须实际运行能证明它的命令（测试 / 构建 / 复现步骤）并核对输出。"应该没问题 / 逻辑上是对的" 不算完成；没跑过验证就宣称完成等于虚报
+- **WF6** [根据项目需要追加，如"不主动运行 deploy.sh，提示用户手动执行"]
 
 ### HM — Harness 维护 (Harness Maintenance)
 
