@@ -28,7 +28,6 @@ Create a small, vendor-neutral project harness so future AI sessions can start f
 - `docs/issues.md`
 - `docs/issues-archive.md`
 - `docs/architecture.md`（opt-in，见 Step 2）
-- `docs/pm-overview.md`（opt-in，见 Step 2）
 
 若任一存在，列出冲突文件并询问用户选择：覆盖、跳过已存在文件、或逐文件确认。未得到确认前不要覆盖。若已存在的是本套 harness（AGENTS.md 带 `harness_version` frontmatter），建议改走 Doctor 模式。
 
@@ -41,7 +40,7 @@ Create a small, vendor-neutral project harness so future AI sessions can start f
 - 技术栈关键字：`{{STACK}}`
 - owner：`{{OWNER}}`
 - 日期：`{{TODAY}}`，可用本地日期
-- 是否需要 PM 视图 / 独立架构文档？（`pm-overview.md` / `architecture.md`；单人项目通常不需要，架构知识可先落在 AGENTS.md 规则组里，长大后再拆）
+- 是否需要独立架构文档 `architecture.md`？（单人项目通常不需要，架构知识可先落在 AGENTS.md 规则组里，长大后再拆）
 
 Codex 下如果没有专用提问工具，直接用一段简短文字向用户提问。
 
@@ -59,21 +58,21 @@ Codex 下如果没有专用提问工具，直接用一段简短文字向用户�
 | `templates/docs/issues.md` | `./docs/issues.md` | 必选 |
 | `templates/docs/issues-archive.md` | `./docs/issues-archive.md` | 必选 |
 | `templates/docs/architecture.md` | `./docs/architecture.md` | Step 2 用户选了才生成 |
-| `templates/docs/pm-overview.md` | `./docs/pm-overview.md` | Step 2 用户选了才生成 |
 
 Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`{{TODAY}}`。
 
 写盘前的裁剪（模板噪音由 agent 在脚手架期消化，不留给用户）：
 
-1. `conventions.md`：按 `{{STACK}}` **删除不适用的可选块**（如 Python 项目删 TS/React/样式块），只留语言无关核心 + 命中的语言块。
-2. `AGENTS.md`：未选 opt-in 文档时，从快速导航表删除对应行。
-3. `AGENTS.md`：根据仓库现状推断 1–2 个领域规则组（如 DATA / SEC / API），在注释示例处给出具体建议供用户确认，而不是只留空壳注释。
+1. `conventions.md`：按 `{{STACK}}` **删除不适用的可选块**（如 Python 项目删 TS 块），只留语言无关核心 + 命中的语言块。
+2. `AGENTS.md`：未选 architecture.md 时，从快速导航表删除对应行。
+3. `AGENTS.md`：根据仓库现状推断 1–2 个领域规则组（如 DATA / SEC / API），替换规则区末尾的注释占位，给出具体建议供用户确认。
+4. `AGENTS.md`「常用命令」：从 package.json / Makefile / pyproject 等填入真实命令，**至少包含验证命令**（test / lint / typecheck / build）——WF2 完成门依赖它。填完删掉注释。
 
 ### Step 4 — Post-Setup Guidance
 
 落地后提示用户补充：
 
-1. `AGENTS.md`：把通用 WF 规则扩展成项目专属编号规则，例如 `SEC1`、`DATA2`、`TX3`。
+1. `AGENTS.md`：补充项目专属编号规则（`WF4` 占位、`SEC1`、`DATA2` 等）。只写模型从代码里看不出、不写就会犯错的规则。
 2. `docs/plan.md`：填入首个活跃里程碑和验收条件。
 3. `docs/conventions.md`：确认 Step 3 裁剪结果，补充项目技术约定。
 4. （如生成）`docs/architecture.md`：按实际架构补齐模块边界。
@@ -91,12 +90,14 @@ Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`
 
 触发：项目已有本套 harness，且用户说"巡检 / 体检 / doctor / 检查漂移"，或 Step 1 发现 `harness_version` 后用户同意改走巡检。
 
-执行：按 `references/doctor.md` 的清单逐项跑**只读**检查（grep / ls / 对比），汇总报告：命中的漂移、位置、建议修复。**先报告、征询确认后再修**，与 Guardrails 一致。
+执行：在项目根运行 `bash <本 skill 目录>/scripts/doctor.sh`（确定性只读检查），再按 `references/doctor.md` 补人工判断项，汇总报告。**先报告、征询确认后再修**，与 Guardrails 一致。
 
 ## Harness Conventions
 
-- **编号硬规**：每条硬规则使用 `<前缀><数字>`，例如 `WF1` / `SEC2` / `TX3`。内置三组：WF（工作流：plan 门槛、踩坑记录、worktree 隔离、完成前验证门——宣称完成必须先跑证明命令；关键规则带反合理化措辞）+ HM（harness 自维护：docs 变动同步导航、frontmatter 刷新、绝对日期、禁仓外引用、issues.md 为状态唯一权威、AGENTS.md ≤150 行常载预算）+ CH（代码健康：收尾三问〔记 ISS / 精简 diff / 已验证〕、先搜后写 + Rule of Three、Tidy First 结构与行为分离、里程碑精简 pass；阈值细则在 conventions.md「代码健康」节）。
-- **frontmatter**：docs 文件带 `last_updated / status`；AGENTS.md 另带 `owner / harness_version`。
-- **plan.md**：只放活跃迭代和待办（≤100 行）；完成历史迁入 `plan-archive.md`；引用问题只写 `ISS-XXX` 链接，不复述状态。
-- **issues.md**：头部索引表（ID / 状态 / 一句话 / 位置）；正文 newest-first；新 ID = 索引最大编号 + 1；正文 >200 行或 resolved >15 条时最旧 resolved 迁 `issues-archive.md`；查阅先索引后单条，不整文件读；条目五段式（日期 / 现象 / 根因 / 方案 / 经验），状态 `open / resolved / superseded`；经验二次命中即升级为 conventions.md 条目或 AGENTS.md 硬规（经验的终点是规则，不是档案）。
-- **AGENTS.md**：保持短、可扫读（≤150 行，HM7），包含快速导航（含加载分层：常读 / 按需 / 默认不读）、硬规、技术栈、目录、常用命令。这是唯一常载文件，任何新增内容先问"值得每个会话都付这份 token 吗"；单个规则组超过 6 条时细则下沉 conventions.md。
+模板本身就是规范的权威，这里只列设计原则，细节不在此复述（避免与模板漂移）：
+
+- **最小常载**：AGENTS.md 是唯一常载文件（≤150 行，HM5）。每行都要回答"删了它模型会犯错吗"——模型已知的通用惯例、能从代码读出的内容（目录树、技术栈细节）不写。
+- **编号硬规**：`<前缀><数字>`，便于 review 引用。内置三组：WF（plan 门槛、完成门、worktree）/ HM（harness 自维护）/ CH（代码健康）；项目按领域追加。
+- **规则带理由、不喊口号**：一条规则最多一句 why，不用"不可协商 / MUST"类激进措辞。
+- **跨会话状态进 docs/**：`plan.md`（活跃，≤100 行）↔ `plan-archive.md`；`issues.md`（索引 + newest-first + 五段式 + 经验升级为规则）↔ `issues-archive.md`。规则见各模板头部。
+- **确定性的交给脚本**：能 grep 判定的漂移由 `scripts/doctor.sh` 检查，不占 agent 的推理。
