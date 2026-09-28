@@ -2,7 +2,7 @@
 last_updated: {{TODAY}}
 status: active
 owner: {{OWNER}}
-harness_version: 4
+harness_version: 5
 ---
 
 # {{PROJECT_NAME}} — Agent Guidelines
@@ -48,6 +48,13 @@ harness_version: 4
 - **HM5** `docs/` 不得引用仓库外路径（如 `~/.claude/plans/...`）作为权威内容；需要就把内容摘要进仓
 - **HM6** 问题状态的唯一权威是 `docs/issues.md`；`plan.md` 只链接 `ISS-XXX`，不复述其状态
 - **HM7** 常载预算：本文件 ≤ 150 行；单个领域规则组超过 6 条时，细则下沉到 `docs/conventions.md` 或专属文档，此处只留组名 + 一行摘要 + 链接。本文件是唯一常载文件，每多一行所有会话都要付费
+
+### CH — 代码健康 (Code Health)
+
+- **CH1** 收尾三问：每完成一个 plan 步骤或非平凡改动，宣称完成前依次自问：① 要记 ISS 吗（WF2）② 本次 diff 能精简吗——重复块、死代码、无用参数/分支、可复用却新写的实现 ③ 验证跑过了吗（WF5）。"先跑通以后再优化" 不成立——没有"以后"，每轮迭代只会叠加
+- **CH2** 先搜后写：新增函数 / 工具 / 组件前先 grep 现有实现，能扩展就不复制。同一逻辑第三次出现必须抽取（Rule of Three）；前两次允许重复，不做投机抽象（YAGNI）
+- **CH3** 结构与行为分离（Tidy First）：重构单独提交 `refactor:`，期间不改行为、测试保持绿；超出本次任务范围的重构不顺手做，记入 `plan.md` 的 `🔧 技术债` 行
+- **CH4** 里程碑收尾做一次精简 pass（删死代码 / 合并重复 / 拆超限文件），作为验收 checkbox；阈值与细则见 `docs/conventions.md` 的「代码健康」节
 
 <!-- 按项目领域在此添加专属规则分组，例如：
 

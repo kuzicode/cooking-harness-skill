@@ -35,6 +35,17 @@
 - `.claude/settings.local.json` 的 `permissions.allow` 条目 > ~50（尤其含具体 PID 的 `kill`、一次性 URL、转义 one-liner）→ 建议用 fewer-permission-prompts 类工具清理。本 skill 不代改 settings。
 - 残留 `.claude/worktrees/` 下早已合并的旧 worktree → 提示用户确认后清理。
 
+## D6 — 代码健康（CH 规则组的落地情况）
+
+非 git 仓库则跳过本节。以下只给趋势信号，不做价值判断；结论交给用户。
+
+- **超限文件**：`git ls-files | grep -vE '(\.lock|-lock\.|\.md|\.json|\.svg)$' | xargs wc -l 2>/dev/null | sort -rn | awk '$2!="total" && $1>400'` → 列出超 conventions 阈值的文件，建议拆分或记 `🔧 技术债`。
+- **重构占比**：`git log --oneline -50 | grep -c ' refactor:'` → 为 0 且提交数 ≥ 30 时警告"近 50 次提交无结构整理"（违背 CH3 / CH4 的信号）。
+- **净增长趋势**：`git log --since=30.days --numstat --format= | awk '{a+=$1; d+=$2} END {print a+0, d+0}'` → 删除 / 新增 < 0.1 且新增 > 2000 时提示"只增不减"，建议安排精简 pass。
+- **技术债积压**：`grep -c '^| 🔧' docs/plan.md` > 5 → 建议开一个整洁里程碑集中偿还。
+- **里程碑精简 pass**：plan-archive.md 最近归档的里程碑是否有已勾选的 CH4 验收行 → 缺失则标记。
+- **可选工具**：项目已配置 `knip` / `vulture` / `jscpd` 等（见 conventions.md 对应语言块）则运行并附摘要；未配置则跳过，不安装依赖。
+
 ## 报告格式
 
 ```
@@ -44,6 +55,7 @@
 |---|---|---|---|---|
 | D1 | ISS 重复 ID | ❌ ISS-027 ×2 | issues.md:65,436 | 后者重编号 ISS-032 |
 | D3 | 导航漂移 | ⚠️ docs/design/ 未收录 | AGENTS.md 导航表 | 补行 |
+| D6 | 超限文件 | ⚠️ src/engine.ts 812 行 | — | 按领域拆分或记 🔧 技术债 |
 | ... | | ✅ | | |
 ```
 
