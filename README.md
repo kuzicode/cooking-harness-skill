@@ -22,6 +22,8 @@ Claude Code / Codex compatible skill for bootstrapping a project harness (`AGENT
 - AGENTS.md 快速导航带加载分层（常读 / 按需 / 默认不读），控制常载上下文成本
 - **Doctor 模式**：`scripts/doctor.sh` 一次跑完确定性只读检查（重复 ISS 编号、索引/正文错位、导航表与 docs/ 不符、frontmatter 缺失、仓外引用、相对时间词、跨文件状态矛盾、常读层预算、代码健康趋势），`references/doctor.md` 补人工判断项
 
+版本历史见 [CHANGELOG.md](./CHANGELOG.md)。
+
 ## 安装
 
 ```bash
