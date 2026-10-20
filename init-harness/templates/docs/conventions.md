@@ -35,7 +35,7 @@ status: active
 
 **童子军规则的边界**：只清理本次改动触及的文件；跨模块大改走 CH2 → `🔧 技术债` 行 → 单独里程碑。
 
-**里程碑精简 pass（CH3）检查项**：新增的死代码 / 未用导出、重复块、超阈值文件与函数、临时调试代码与 TODO。
+**里程碑精简 pass（CH3）检查项**：新增的死代码 / 未用导出、重复块、超阈值文件与函数、临时调试代码与 TODO。有 `health` 脚本（见下方语言块「精简工具」）时以其输出为准，只处理本里程碑新增的命中项，存量记 `🔧 技术债`。
 
 ## 项目特有约定
 
@@ -49,10 +49,10 @@ status: active
 
 ## TypeScript（如适用）
 
-- 精简工具：`knip`（死代码 / 未用导出与依赖）、`jscpd`（重复块）、eslint `complexity` / `max-lines-per-function`
+- 精简工具：`knip`（死代码 / 未用导出与依赖）、`jscpd`（重复块）、eslint `complexity` / `max-depth` / `max-params` / `max-lines-per-function`（阈值同上表）。包成只报告、不拦提交的 `npm run health`（不混进 `lint`），首次结果记为技术债基线
 
 ## Python（如适用）
 
-- 精简工具：`vulture`（死代码）、`radon cc`（圈复杂度）、`ruff`（含 `C901`）、`jscpd`（重复块）
+- 精简工具：`vulture`（死代码）、`radon cc`（圈复杂度）、`ruff`（含 `C901`）、`jscpd`（重复块）。同样包成只报告的 `health` 脚本 / make 目标，首次结果记为技术债基线
 
 <!-- ▲ 可选块结束 ▲ -->

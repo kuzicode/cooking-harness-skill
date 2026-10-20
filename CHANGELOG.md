@@ -2,6 +2,14 @@
 
 版本号对应模板 `AGENTS.md` frontmatter 中的 `harness_version`。
 
+## v6.1 — 精简工具落地（2026-10-20）
+
+源于 hyperflow 巡检：conventions 语言块只列了工具名、doctor 对「未配置」直接跳过，老项目升级后 CH 阈值表除文件行数外长期无任何检查。
+
+- conventions 模板：TS / Python「精简工具」改为可执行建议——包成只报告、不拦提交的 `health` 脚本（不混进 lint），首次结果记技术债基线；TS 补 `max-depth` / `max-params` 与阈值表对齐；CH3 检查项注明以 `health` 输出为准、只处理新增命中
+- doctor.md：精简工具人工项改为「有 health 就跑并对比基线，没有就建议落地（征得同意再装依赖）」，并提示老项目语言块缺工具行
+- 规则条数与 `harness_version` 不变
+
 ## v6 — 精简（2026-09-28）
 
 依据 Anthropic Claude Code 官方最佳实践与 ETH 2026《Evaluating AGENTS.md》：常载文件越短越好，只写模型从代码里看不出、不写就会犯错的内容。
