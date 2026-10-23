@@ -2,6 +2,15 @@
 
 版本号对应模板 `AGENTS.md` frontmatter 中的 `harness_version`。
 
+## v6.2 — UI 反 AI slop（2026-10-23）
+
+源于社区经验（@luinlee）：模型（尤其 Opus）生成 UI 时爱堆 slogan 和说明性文字，界面像说明书；一句 "Avoid unnecessary secondary labels and descriptions. Let the layout do the explaining." 即可明显改善，让模型把精力放在 UI/UX 设计上。
+
+- AGENTS.md 模板：新增**可选 UI 规则组**（`UI1`，保留英文原句 + 一句中文理由），无界面项目在脚手架期删除，不占常载预算
+- SKILL.md Step 3：新增按技术栈保留 / 删除 UI 块的裁剪步骤
+- doctor.md：人工项新增「有 UI 但无 `UI1`」→ 建议补上
+- 核心 12 条与 `harness_version` 不变
+
 ## v6.1 — 精简工具落地（2026-10-20）
 
 源于 hyperflow 巡检：conventions 语言块只列了工具名、doctor 对「未配置」直接跳过，老项目升级后 CH 阈值表除文件行数外长期无任何检查。

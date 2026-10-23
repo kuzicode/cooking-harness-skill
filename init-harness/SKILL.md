@@ -65,8 +65,9 @@ Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`
 
 1. `conventions.md`：按 `{{STACK}}` **删除不适用的可选块**（如 Python 项目删 TS 块），只留语言无关核心 + 命中的语言块。
 2. `AGENTS.md`：未选 architecture.md 时，从快速导航表删除对应行。
-3. `AGENTS.md`：根据仓库现状推断 1–2 个领域规则组（如 DATA / SEC / API），替换规则区末尾的注释占位，给出具体建议供用户确认。
-4. `AGENTS.md`「常用命令」：从 package.json / Makefile / pyproject 等填入真实命令，**至少包含验证命令**（test / lint / typecheck / build）——WF2 完成门依赖它。填完删掉注释。
+3. `AGENTS.md`：按 `{{STACK}}` / 仓库现状判断有无 UI——无则删除 UI 可选块，有则保留并删掉其注释标记。
+4. `AGENTS.md`：根据仓库现状推断 1–2 个领域规则组（如 DATA / SEC / API），替换规则区末尾的注释占位，给出具体建议供用户确认。
+5. `AGENTS.md`「常用命令」：从 package.json / Makefile / pyproject 等填入真实命令，**至少包含验证命令**（test / lint / typecheck / build）——WF2 完成门依赖它。填完删掉注释。
 
 ### Step 4 — Post-Setup Guidance
 
@@ -97,7 +98,7 @@ Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`
 模板本身就是规范的权威，这里只列设计原则，细节不在此复述（避免与模板漂移）：
 
 - **最小常载**：AGENTS.md 是唯一常载文件（≤150 行，HM5）。每行都要回答"删了它模型会犯错吗"——模型已知的通用惯例、能从代码读出的内容（目录树、技术栈细节）不写。
-- **编号硬规**：`<前缀><数字>`，便于 review 引用。内置三组：WF（plan 门槛、完成门、worktree）/ HM（harness 自维护）/ CH（代码健康）；项目按领域追加。
+- **编号硬规**：`<前缀><数字>`，便于 review 引用。内置三组：WF（plan 门槛、完成门、worktree）/ HM（harness 自维护）/ CH（代码健康），外加可选 UI 组（有界面才保留）；项目按领域追加。
 - **规则带理由、不喊口号**：一条规则最多一句 why，不用"不可协商 / MUST"类激进措辞。
 - **跨会话状态进 docs/**：`plan.md`（活跃，≤100 行）↔ `plan-archive.md`；`issues.md`（索引 + newest-first + 五段式 + 经验升级为规则）↔ `issues-archive.md`。规则见各模板头部。
 - **确定性的交给脚本**：能 grep 判定的漂移由 `scripts/doctor.sh` 检查，不占 agent 的推理。

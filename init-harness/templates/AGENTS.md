@@ -51,6 +51,12 @@ harness_version: 6
 - **CH2** 结构与行为分离（Tidy First）：重构单独提交 `refactor:`，不改行为、测试保持绿；超出本次范围的重构不顺手做，记入 `plan.md` 的 `🔧 技术债` 行
 - **CH3** 里程碑收尾做一次精简 pass（删死代码 / 合并重复 / 拆超限文件），作为验收 checkbox；阈值见 `docs/conventions.md`「代码健康」
 
+<!-- ▼ 可选：项目有 UI（Web / App / 桌面 / TUI）时保留，否则删除 ▼ -->
+### UI — 界面
+
+- **UI1** Avoid unnecessary secondary labels and descriptions. Let the layout do the explaining. ——不加 slogan、副标题、说明性小字；靠层级、分组、留白、对齐表达信息，需要解释时先改设计
+<!-- ▲ 可选块结束 ▲ -->
+
 <!-- 按项目领域追加规则组（如 SEC / DATA / API），编号 <前缀><数字> -->
 
 ## 提交规范

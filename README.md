@@ -17,6 +17,7 @@ Claude Code / Codex compatible skill for bootstrapping a project harness (`AGENT
 - 收集项目名 / 技术栈 / owner 后替换模板 placeholder；按技术栈裁剪 `conventions.md` 可选块；从项目配置填入真实常用命令（含验证命令）
 - 编号化硬规（WF1 / SEC2 等），内置三组共 12 条：**WF 工作流**（plan 门槛、**完成门**——验证并附证据 / 精简 diff / 记 ISS / 问 memory、worktree）、**HM 自维护**（docs 变动同步导航、绝对日期、禁仓外引用、issues 为状态唯一权威、AGENTS.md ≤150 行常载预算）
 - **CH 代码健康规则组**——防止长期 agent 迭代堆成屎山：先搜后写 + Rule of Three、Tidy First（重构单独提交，范围外重构记 `🔧 技术债`）、里程碑精简 pass；`conventions.md` 附量化阈值与各语言精简工具
+- **可选 UI 规则组**——有界面的项目保留 `UI1`（"Let the layout do the explaining"），抑制 AI 生成界面堆砌 slogan / 说明文字
 - `plan.md` ≤ 100 行 + `plan-archive.md` 历史归档模式
 - `issues.md` 头部索引表 + newest-first + ISS-XXX 五段式踩坑模板；超阈值迁 `issues-archive.md`；**经验升级规则**——同类坑二次命中即提炼为 conventions / 硬规
 - AGENTS.md 快速导航带加载分层（常读 / 按需 / 默认不读），控制常载上下文成本
