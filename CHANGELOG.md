@@ -2,6 +2,17 @@
 
 版本号对应模板 `AGENTS.md` frontmatter 中的 `harness_version`。
 
+## v7 — 仓库安全（2026-10-28）
+
+源于 hyperflow：文档持续积累部署 / 服务器细节，入不入仓要在脚手架期定；巡检又发现私有仓库「运维配置有意入仓」没有写法，doctor 把 HM6 里任意反引号都当本地专用路径误报 ❌、已接受的服务器 IP 每次重报。
+
+- **新增 HM6 仓库安全**：句式固定为「仓库安全（可见性）：本地专用 <清单>。…」；新增 placeholder `{{REPO_VISIBILITY}}`、`{{PRIVATE_PATHS}}`（无则写 `无`）；「私有入仓」变体允许 docs 与运维配置入仓，密钥 / token / .env 仍不入仓，改公开前清理并改写历史
+- **SKILL.md**：Step 2 询问可见性与本地专用路径；Step 3 追加 `.gitignore`、HM6 句式两条裁剪；Guardrails 不把运维细节写进入仓文件
+- **doctor.sh 新增 D7**：本地专用路径仍被跟踪（只解析「本地专用」到第一个「。」）；声明私有但 `gh` 查得 PUBLIC 报 ❌；入仓密钥 / token、`.env` 被跟踪；入仓文件与提交说明含公网 IP（声明私有时只备注）；缺 HM6
+- **doctor.sh D6**：30 天净增长不计 lock 文件
+- **doctor.md**：D7 命中后的处置（改写历史 / 删库重建 / 联系 GitHub Support，凭据一律轮换）、HM6 句式升级
+- 核心规则 12 → 13 条（HM6），`harness_version` 6 → 7
+
 ## v6.2 — UI 反 AI slop（2026-10-23）
 
 源于社区经验（@luinlee）：模型（尤其 Opus）生成 UI 时爱堆 slogan 和说明性文字，界面像说明书；一句 "Avoid unnecessary secondary labels and descriptions. Let the layout do the explaining." 即可明显改善，让模型把精力放在 UI/UX 设计上。

@@ -2,7 +2,7 @@
 last_updated: {{TODAY}}
 status: active
 owner: {{OWNER}}
-harness_version: 6
+harness_version: 7
 ---
 
 # {{PROJECT_NAME}} — Agent Guidelines
@@ -44,6 +44,7 @@ harness_version: 6
 - **HM3** 文档只写绝对日期 `YYYY-MM-DD`；不以仓库外路径（如 `~/.claude/plans/`）作为权威内容，需要就摘要进仓
 - **HM4** 问题状态的唯一权威是 `docs/issues.md`；`plan.md` 只链接 `ISS-XXX`，不复述状态
 - **HM5** 本文件是唯一常载文件，≤ 150 行；领域规则组超过 6 条时细则下沉 `docs/conventions.md`，此处只留摘要 + 链接
+- **HM6** 仓库安全（{{REPO_VISIBILITY}}）：本地专用 {{PRIVATE_PATHS}}（已 gitignore，不要 `git add -f`）。服务器 IP / SSH 账号 / 密钥 / token / 内部域名 / 同机服务等运维细节只写本地专用文件，不进入仓文件、README 和提交说明；推送前先过 Doctor D7
 
 ### CH — 代码健康
 

@@ -41,6 +41,7 @@ Create a small, vendor-neutral project harness so future AI sessions can start f
 - owner：`{{OWNER}}`
 - 日期：`{{TODAY}}`，可用本地日期
 - 是否需要独立架构文档 `architecture.md`？（单人项目通常不需要，架构知识可先落在 AGENTS.md 规则组里，长大后再拆）
+- 仓库可见性 `{{REPO_VISIBILITY}}`（公开 / 私有）与本地专用路径 `{{PRIVATE_PATHS}}`：文档会持续积累部署、服务器、内部决策等细节，脚手架期就要定。**公开仓库或个人项目默认** `docs/`、`AGENTS.md`、`CLAUDE.md` 与部署脚本 / 服务器配置目录都本地专用；私有协作仓库可让 `docs/` 入仓，部署与服务器配置默认仍本地专用——用户明确要运维配置入仓（如需随仓库部署、多人共用）时按 Step 3 第 7 条写「私有入仓」变体
 
 Codex 下如果没有专用提问工具，直接用一段简短文字向用户提问。
 
@@ -59,7 +60,7 @@ Codex 下如果没有专用提问工具，直接用一段简短文字向用户�
 | `templates/docs/issues-archive.md` | `./docs/issues-archive.md` | 必选 |
 | `templates/docs/architecture.md` | `./docs/architecture.md` | Step 2 用户选了才生成 |
 
-Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`{{TODAY}}`。
+Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`{{TODAY}}`、`{{REPO_VISIBILITY}}`（`公开` / `私有`）、`{{PRIVATE_PATHS}}`（反引号包裹、顿号分隔的路径列表；没有则写 `无`）。
 
 写盘前的裁剪（模板噪音由 agent 在脚手架期消化，不留给用户）：
 
@@ -68,6 +69,8 @@ Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`
 3. `AGENTS.md`：按 `{{STACK}}` / 仓库现状判断有无 UI——无则删除 UI 可选块，有则保留并删掉其注释标记。
 4. `AGENTS.md`：根据仓库现状推断 1–2 个领域规则组（如 DATA / SEC / API），替换规则区末尾的注释占位，给出具体建议供用户确认。
 5. `AGENTS.md`「常用命令」：从 package.json / Makefile / pyproject 等填入真实命令，**至少包含验证命令**（test / lint / typecheck / build）——WF2 完成门依赖它。填完删掉注释。
+6. `.gitignore`：把 `{{PRIVATE_PATHS}}` 逐行追加（文件不存在则创建，已有条目不重复），附一行注释说明「本地专用：文档 / 部署 / 服务器配置」。已被 git 跟踪的路径只提示用户 `git rm --cached`，不擅自执行。
+7. `AGENTS.md` HM6 句式固定为「仓库安全（可见性）：本地专用 <清单>。…」——Doctor D7 只解析「本地专用」到第一个「。」之间的反引号路径，其他位置的反引号不算。「私有入仓」变体：清单写 `无`，第二句换成「私有仓库，docs 与运维配置（含服务器地址）允许入仓；密钥 / token / .env / 数据库仍不入仓与提交说明；改公开前先清理服务器地址并改写历史」，第二句里的路径不加反引号。
 
 ### Step 4 — Post-Setup Guidance
 
@@ -77,7 +80,7 @@ Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`
 2. `docs/plan.md`：填入首个活跃里程碑和验收条件。
 3. `docs/conventions.md`：确认 Step 3 裁剪结果，补充项目技术约定。
 4. （如生成）`docs/architecture.md`：按实际架构补齐模块边界。
-5. 询问 `docs/` 是否入仓；私有个人 harness 可 ignore，协作项目或设计权威建议入仓。
+5. 复述 HM6 的可见性、本地专用清单与 `.gitignore` 结果；提醒：已推送到公开仓库的敏感内容删文件不够，提交历史仍可见（处理方式见 `references/doctor.md` D7）。
 6. 提示用户：日后可随时说"巡检 harness"跑 Doctor 检查漂移。
 
 ### Step 5 — Guardrails
@@ -86,6 +89,7 @@ Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`
 - 不安装依赖。
 - 不写业务代码。
 - 不覆盖已有文件，除非用户已确认。
+- 不把服务器地址、账号、密钥等运维细节写进会入仓的文件（HM6）。
 
 ## Doctor — 巡检已有 harness
 
@@ -102,3 +106,4 @@ Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`
 - **规则带理由、不喊口号**：一条规则最多一句 why，不用"不可协商 / MUST"类激进措辞。
 - **跨会话状态进 docs/**：`plan.md`（活跃，≤100 行）↔ `plan-archive.md`；`issues.md`（索引 + newest-first + 五段式 + 经验升级为规则）↔ `issues-archive.md`。规则见各模板头部。
 - **确定性的交给脚本**：能 grep 判定的漂移由 `scripts/doctor.sh` 检查，不占 agent 的推理。
+- **仓库安全前置**：文档是运维细节最容易泄露的地方，入不入仓在脚手架期定（Step 2），由 HM6 + Doctor D7 守住，而不是等推送后再补救。
