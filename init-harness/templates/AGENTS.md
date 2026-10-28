@@ -44,7 +44,7 @@ harness_version: 7
 - **HM3** 文档只写绝对日期 `YYYY-MM-DD`；不以仓库外路径（如 `~/.claude/plans/`）作为权威内容，需要就摘要进仓
 - **HM4** 问题状态的唯一权威是 `docs/issues.md`；`plan.md` 只链接 `ISS-XXX`，不复述状态
 - **HM5** 本文件是唯一常载文件，≤ 150 行；领域规则组超过 6 条时细则下沉 `docs/conventions.md`，此处只留摘要 + 链接
-- **HM6** 仓库安全（{{REPO_VISIBILITY}}）：本地专用 {{PRIVATE_PATHS}}（已 gitignore，不要 `git add -f`）。服务器 IP / SSH 账号 / 密钥 / token / 内部域名 / 同机服务等运维细节只写本地专用文件，不进入仓文件、README 和提交说明；推送前先过 Doctor D7
+- **HM6** 仓库安全（{{REPO_VISIBILITY}}）：本地专用 {{PRIVATE_PATHS}}（已 gitignore，不要 `git add -f`）。凭据 / token / .env 只放本地专用文件；服务器 IP / SSH 账号 / 内部域名在公开仓库只写本地专用文件，私有仓库可入仓但改公开前先清理；推送前先过 Doctor D7
 
 ### CH — 代码健康
 
@@ -55,7 +55,7 @@ harness_version: 7
 <!-- ▼ 可选：项目有 UI（Web / App / 桌面 / TUI）时保留，否则删除 ▼ -->
 ### UI — 界面
 
-- **UI1** Avoid unnecessary secondary labels and descriptions. Let the layout do the explaining. ——不加 slogan、副标题、说明性小字；靠层级、分组、留白、对齐表达信息，需要解释时先改设计
+- **UI1** Avoid unnecessary secondary labels and descriptions. Let the layout do the explaining. ——删重复、无信息量的文案（slogan、复述标题的副标题）；完成任务所需的说明（表单提示、单位、错误原因）保留；能靠层级 / 分组 / 留白表达的先改设计
 <!-- ▲ 可选块结束 ▲ -->
 
 <!-- 按项目领域追加规则组（如 SEC / DATA / API），编号 <前缀><数字> -->

@@ -161,20 +161,44 @@ if [ -f "$PLAN_AR" ]; then
 fi
 
 # ---------- D7 仓库安全（HM6） ----------
+# 检查对象是 git 里的内容，不读工作区：暂存区（下次提交）· HEAD（已提交、暂存区已删的）· 待推送提交新增的行（无上游则为全部历史）
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  EXCL=(':!*-lock.*' ':!*.lock' ':!*.lockb' ':!go.sum')
+  # git_scan <ERE>：输出「位置<TAB>内容」；位置为 path:行（暂存区）/ HEAD:path:行 / <提交>:path（待推送）
+  git_scan() {
+    { git grep -z -nIE --cached -e "$1" -- . "${EXCL[@]}"
+      git rev-parse -q --verify HEAD >/dev/null && git grep -z -nIE -e "$1" HEAD -- . "${EXCL[@]}"
+    } 2>/dev/null | perl -0777 -ne 'while (/([^\0\n]*)\0(\d+)\0([^\n]*)\n/g) {
+        my ($f, $n, $c) = ($1, $2, $3); (my $k = $f) =~ s/^HEAD://;
+        print "$f:$n\t$c\n" unless $seen{"$k:$n"}++ }'
+    git rev-parse -q --verify HEAD >/dev/null || return 0
+    up=$(git rev-parse -q --verify '@{u}' 2>/dev/null)
+    git log -p --no-color --no-ext-diff --format='COMMIT %h' "${up:+$up..}HEAD" -- . "${EXCL[@]}" 2>/dev/null \
+      | RE="$1" perl -ne 'if (/^COMMIT (\S+)/) { $h = $1 } elsif (m{^\+\+\+ b/(.*)}) { $f = $1 }
+          elsif (/^\+(?!\+\+ )(.*)/) { my $c = $1; print "$h:$f\t$c\n" if $c =~ /$ENV{RE}/ && !$seen{"$h:$f"}++ }'
+  }
+  # 公网 IPv4（文件与提交说明同一口径）：输入「位置<TAB>内容」，输出位置。各段 ≤ 255，排除 0/8 · 10/8 · 127/8 · 169.254/16 · 172.16/12 · 192.168/16
+  pubip() {
+    perl -ne 'my ($loc, $c) = split /\t/, $_, 2;
+      while ($c =~ /(?<![\d.])((\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3}))(?![\d.])/g) {
+        next if grep { $_ > 255 } ($2, $3, $4, $5);
+        next if $1 =~ /^(?:0\.|10\.|127\.|169\.254\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)/;
+        print "$loc\n"; last }'
+  }
+
   hm6=$(grep -E '^- \*\*HM6\*\*' AGENTS.md)
   if [ -z "$hm6" ]; then
     warn D7 "HM6 仓库安全规则" "AGENTS.md 缺 HM6 → 从模板补上并确认本地专用清单"
   else
-    # 只解析「本地专用」到第一个「。」之间的路径；旧句式无「本地专用」则取首句
-    seg=$(printf '%s' "$hm6" | perl -CSD -ne 'print /本地专用(.*?)。/ ? $1 : (/^(.*?)。/ ? $1 : $_)')
+    # 只解析「本地专用」到第一个「。」；按字节匹配（不开 -C：源码中文字面量与输入同为 UTF-8 字节）
+    seg=$(printf '%s' "$hm6" | perl -ne 'print /本地专用(.*?)。/ ? $1 : (/^(.*?)。/ ? $1 : $_)')
     tracked=""
     for p in $(printf '%s' "$seg" | grep -oE '`[^` ]+`' | tr -d '`'); do
       [ -n "$(git ls-files -- "$p" 2>/dev/null | head -1)" ] && tracked="$tracked $p"
     done
     [ -n "$tracked" ] && fail D7 "本地专用路径未入仓" "仍被跟踪:$tracked → git rm --cached 并确认 .gitignore" || ok D7 "本地专用路径未入仓"
   fi
-  # HM6 声明私有 → 入仓服务器地址只备注；有 gh 时核对实际可见性
+  # HM6 声明私有 → 服务器地址只备注；有 gh 时核对实际可见性
   private=""; printf '%s' "$hm6" | grep -q '私有' && private=1
   vis=$(command -v gh >/dev/null 2>&1 && gh repo view --json visibility -q .visibility 2>/dev/null)
   if [ -n "$private" ] && [ "$vis" = "PUBLIC" ]; then
@@ -183,31 +207,21 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     ok D7 "仓库可见性" "$vis"
   fi
 
-  files=$(git ls-files | grep -vE '(-lock\.[a-z]+|\.lock|\.(png|jpe?g|gif|ico|woff2?|pdf))$')
-  secret=$(printf '%s\n' "$files" | tr '\n' '\0' | xargs -0 grep -nIE \
-    -e '-----BEGIN [A-Z ]*PRIVATE KEY-----' -e '(ghp|gho|ghs|github_pat)_[A-Za-z0-9_]{20,}' \
-    -e 'sk-[A-Za-z0-9_-]{20,}' -e 'AKIA[0-9A-Z]{16}' 2>/dev/null | cut -d: -f1,2 | oneline)
-  [ -n "$secret" ] && fail D7 "入仓文件含密钥 / token" "$secret → 移出仓库并轮换凭据" || ok D7 "入仓文件含密钥 / token"
+  secret=$(git_scan '-----BEGIN [A-Z ]*PRIVATE KEY-----|(ghp|gho|ghs|github_pat)_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}' \
+    | cut -f1 | head -10 | oneline)
+  [ -n "$secret" ] && fail D7 "入仓内容含密钥 / token" "$secret → 凭据视为已泄露，先轮换，再按 doctor.md D7 移除" || ok D7 "入仓内容含密钥 / token"
 
-  # 公网 IPv4：前后不贴数字或点（避开版本号、SVG 路径），各段 ≤ 255，排除回环 / 私网 / 0.0.0.0
-  ips=$(printf '%s\n' "$files" | tr '\n' '\0' | xargs -0 perl -ne '
-    if (-B $ARGV) { close ARGV; next }
-    while (/(?<![\d.])((\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3}))(?![\d.])/g) {
-      next if grep { $_ > 255 } ($2, $3, $4, $5);
-      next if $1 =~ /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|0\.0\.0\.0)/;
-      print "$ARGV:$.\n";
-    }
-    close ARGV if eof' 2>/dev/null | sort -u | head -10 | oneline)
-  if [ -z "$ips" ]; then ok D7 "入仓文件含公网 IP"
-  elif [ -n "$private" ]; then ok D7 "入仓文件含公网 IP" "HM6 声明私有、允许入仓：${ips}（改公开前清理）"
-  else warn D7 "入仓文件含公网 IP" "$ips → 确认不是服务器地址"; fi
+  envf=$(git ls-files | grep -E '(^|/)\.env(\.|$)' | grep -vE '\.example$' | oneline)
+  [ -n "$envf" ] && fail D7 ".env 被跟踪" "$envf → 凭据视为已泄露，先轮换" || ok D7 ".env 未入仓"
 
-  [ -n "$(git ls-files | grep -E '(^|/)\.env(\.|$)' | grep -vE '\.example$')" ] \
-    && fail D7 ".env 被跟踪" "$(git ls-files | grep -E '(^|/)\.env(\.|$)' | grep -vE '\.example$' | oneline)" || ok D7 ".env 未入仓"
-
-  msg=$(git log -100 --format='%h %s %b' 2>/dev/null | tr '\n' ' ' | sed 's/ \([0-9a-f]\{7,\}\) /\n\1 /g' \
-    | perl -ne 'print((split)[0], "\n") if /(?<![\d.])(?!(?:127|10)\.|192\.168\.|0\.0\.0\.0)\d{1,3}(\.\d{1,3}){3}(?![\d.])/' | sort -u | oneline)
-  [ -n "$msg" ] && warn D7 "提交说明含公网 IP" "$msg → 已推送则按 doctor.md D7 处置" || ok D7 "提交说明含公网 IP"
+  # 地址类只需人工确认：私有仓库按 HM6 允许，只备注
+  ip_row() {
+    if [ -z "$2" ]; then ok D7 "$1"
+    elif [ -n "$private" ]; then ok D7 "$1" "HM6 声明私有、允许：$2（改公开前清理）"
+    else warn D7 "$1" "$2 → 人工确认是否服务器地址"; fi
+  }
+  ip_row "入仓内容含公网 IP" "$(git_scan '[0-9]{1,3}(\.[0-9]{1,3}){3}' | pubip | head -10 | oneline)"
+  ip_row "提交说明含公网 IP" "$(git log -100 -z --format='%h%x09%s %b' 2>/dev/null | tr '\n\0' ' \n' | pubip | head -10 | oneline)"
 fi
 
 echo

@@ -41,7 +41,7 @@ Create a small, vendor-neutral project harness so future AI sessions can start f
 - owner：`{{OWNER}}`
 - 日期：`{{TODAY}}`，可用本地日期
 - 是否需要独立架构文档 `architecture.md`？（单人项目通常不需要，架构知识可先落在 AGENTS.md 规则组里，长大后再拆）
-- 仓库可见性 `{{REPO_VISIBILITY}}`（公开 / 私有）与本地专用路径 `{{PRIVATE_PATHS}}`：文档会持续积累部署、服务器、内部决策等细节，脚手架期就要定。**公开仓库或个人项目默认** `docs/`、`AGENTS.md`、`CLAUDE.md` 与部署脚本 / 服务器配置目录都本地专用；私有协作仓库可让 `docs/` 入仓，部署与服务器配置默认仍本地专用——用户明确要运维配置入仓（如需随仓库部署、多人共用）时按 Step 3 第 7 条写「私有入仓」变体
+- 仓库可见性 `{{REPO_VISIBILITY}}`（公开 / 私有）与本地专用路径 `{{PRIVATE_PATHS}}`：**按内容敏感性隔离，不按目录整体隔离**。harness（`AGENTS.md` / `CLAUDE.md` / `docs/`）与部署逻辑默认入仓，换设备 clone 即可用；凭据、`.env*`、服务器清单（IP / SSH 账号 / 内部域名）放本地专用文件（如 `.env*`、`deploy/hosts.local`），由入仓脚本读取。公开仓库的文档与提交说明不写服务器地址；私有仓库可写，但改公开前先清理
 
 Codex 下如果没有专用提问工具，直接用一段简短文字向用户提问。
 
@@ -69,8 +69,8 @@ Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`
 3. `AGENTS.md`：按 `{{STACK}}` / 仓库现状判断有无 UI——无则删除 UI 可选块，有则保留并删掉其注释标记。
 4. `AGENTS.md`：根据仓库现状推断 1–2 个领域规则组（如 DATA / SEC / API），替换规则区末尾的注释占位，给出具体建议供用户确认。
 5. `AGENTS.md`「常用命令」：从 package.json / Makefile / pyproject 等填入真实命令，**至少包含验证命令**（test / lint / typecheck / build）——WF2 完成门依赖它。填完删掉注释。
-6. `.gitignore`：把 `{{PRIVATE_PATHS}}` 逐行追加（文件不存在则创建，已有条目不重复），附一行注释说明「本地专用：文档 / 部署 / 服务器配置」。已被 git 跟踪的路径只提示用户 `git rm --cached`，不擅自执行。
-7. `AGENTS.md` HM6 句式固定为「仓库安全（可见性）：本地专用 <清单>。…」——Doctor D7 只解析「本地专用」到第一个「。」之间的反引号路径，其他位置的反引号不算。「私有入仓」变体：清单写 `无`，第二句换成「私有仓库，docs 与运维配置（含服务器地址）允许入仓；密钥 / token / .env / 数据库仍不入仓与提交说明；改公开前先清理服务器地址并改写历史」，第二句里的路径不加反引号。
+6. `.gitignore`：把 `{{PRIVATE_PATHS}}` 逐行追加（文件不存在则创建，已有条目不重复），附一行注释说明「本地专用：凭据 / 服务器清单」。已被 git 跟踪的路径只提示用户 `git rm --cached`，不擅自执行。
+7. `AGENTS.md` HM6 句式固定为「仓库安全（可见性）：本地专用 <清单>。…」——Doctor D7 只解析「本地专用」到第一个「。」之间的反引号路径；后文提到的路径（如允许入仓的目录）不加反引号也不会被检查。
 
 ### Step 4 — Post-Setup Guidance
 
