@@ -2,7 +2,8 @@
 last_updated: {{TODAY}}
 status: active
 owner: {{OWNER}}
-harness_version: 7
+harness_version: 8
+harness_profile: {{PROFILE}}
 ---
 
 # {{PROJECT_NAME}} — Agent Guidelines

@@ -2,6 +2,16 @@
 
 版本号对应模板 `AGENTS.md` frontmatter 中的 `harness_version`。
 
+## v8 — 项目类型：solo 和 open-source（2026-11-06）
+
+源于 deepfy-health 开源：公开仓库要让贡献者知道怎么干活，维护者的路线和运维要留在私有层。
+
+- **新增 `harness_profile`**：`solo`（默认）/ `open-source` / `maintainer`；`SKILL.md` Step 2 询问，新增 `references/profiles.md`
+- **新增模板**：`templates/open-source/`（ROADMAP、CONTRIBUTING、SECURITY、PR 模板、RL 红线）、`templates/maintainer/`（AGENTS、plan、pr-gate、pre-push、.gitignore）
+- **doctor 新增 D8**：公开层必备文件、不提私有文件名、推送前扫描已启用；维护者层 `CLAUDE.md` 软链、公开仓库被忽略
+- **doctor 修误报**：HM6 的 `.env*` 不再命中 `.env.example`；SVG 路径坐标不算 IP；近 30 天不足 10 次提交时不判断净增长
+- 规则条数不变，`harness_version` 7 → 8
+
 ## v7.1 — D7 修准（2026-10-28）
 
 源于 v7 复查 review（5 条均复现属实）。

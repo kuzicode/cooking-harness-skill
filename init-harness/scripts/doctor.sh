@@ -139,7 +139,10 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   lockre='(^|/)(package-lock\.json|npm-shrinkwrap\.json|pnpm-lock\.yaml|go\.sum|[^/]*\.lockb?|[^/]*-lock\.(json|ya?ml))$'
   set -- $(git log --since=30.days --numstat --format= 2>/dev/null \
     | awk -v lr="$lockre" '$1 ~ /^[0-9]+$/ && $3 !~ lr {a+=$1; d+=$2} END{print a+0, d+0}')
-  if [ "$1" -gt 2000 ] && [ $(($2 * 10)) -lt "$1" ]; then
+  recent=$(git rev-list --count --since=30.days HEAD 2>/dev/null || echo 0)
+  if [ "$recent" -lt 10 ]; then
+    ok D6 "30 天净增长" "+$1 / -$2（只有 $recent 次提交，可能是新导入，不判断）"
+  elif [ "$1" -gt 2000 ] && [ $(($2 * 10)) -lt "$1" ]; then
     warn D6 "30 天净增长" "+$1 / -$2 → 只增不减，安排精简 pass"
   else
     ok D6 "30 天净增长" "+$1 / -$2"
@@ -180,6 +183,7 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   # 公网 IPv4（文件与提交说明同一口径）：输入「位置<TAB>内容」，输出位置。各段 ≤ 255，排除 0/8 · 10/8 · 127/8 · 169.254/16 · 172.16/12 · 192.168/16
   pubip() {
     perl -ne 'my ($loc, $c) = split /\t/, $_, 2;
+      next if $loc =~ /\.svg(?::|$)/ || $c =~ /\sd=["{]/; # SVG 路径坐标不是 IP
       while ($c =~ /(?<![\d.])((\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3}))(?![\d.])/g) {
         next if grep { $_ > 255 } ($2, $3, $4, $5);
         next if $1 =~ /^(?:0\.|10\.|127\.|169\.254\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)/;
@@ -194,7 +198,7 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     seg=$(printf '%s' "$hm6" | perl -ne 'print /本地专用(.*?)。/ ? $1 : (/^(.*?)。/ ? $1 : $_)')
     tracked=""
     for p in $(printf '%s' "$seg" | grep -oE '`[^` ]+`' | tr -d '`'); do
-      [ -n "$(git ls-files -- "$p" 2>/dev/null | head -1)" ] && tracked="$tracked $p"
+      [ -n "$(git ls-files -- "$p" 2>/dev/null | grep -v '\.example$' | head -1)" ] && tracked="$tracked $p"
     done
     [ -n "$tracked" ] && fail D7 "本地专用路径未入仓" "仍被跟踪:$tracked → git rm --cached 并确认 .gitignore" || ok D7 "本地专用路径未入仓"
   fi
@@ -222,6 +226,28 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   }
   ip_row "入仓内容含公网 IP" "$(git_scan '[0-9]{1,3}(\.[0-9]{1,3}){3}' | pubip | head -10 | oneline)"
   ip_row "提交说明含公网 IP" "$(git log -100 -z --format='%h%x09%s %b' 2>/dev/null | tr '\n\0' ' \n' | pubip | head -10 | oneline)"
+fi
+
+# ---------- D8 分层（harness_profile） ----------
+profile=$(sed -n 's/^harness_profile: *//p' AGENTS.md | head -1)
+if [ "$profile" = "open-source" ]; then
+  miss=""; for f in LICENSE CONTRIBUTING.md SECURITY.md ROADMAP.md; do [ -f "$f" ] || miss="$miss $f"; done
+  [ -n "$miss" ] && fail D8 "公开层必备文件" "缺少:$miss" || ok D8 "公开层必备文件"
+  [ -f docs/plan.md ] && warn D8 "公开层无私有 plan" "docs/plan.md 存在 → 公开路线放 ROADMAP.md，真实计划放维护者层" || ok D8 "公开层无私有 plan"
+  if [ -f ../AGENTS.md ] && grep -q '^harness_profile: *maintainer' ../AGENTS.md; then
+    # 维护者层 docs/ 的文件名不能出现在公开层（公开层自己也有的同名文件除外）；维护者层目录名同理
+    terms=""; for f in ../docs/*.md; do b=$(basename "$f"); [ -e "docs/$b" ] && continue; terms="$terms|docs/$b"; [ "$b" = plan.md ] || terms="$terms|$b"; done # plan.md 太通用，只查带路径的写法
+    terms="hosts\.local|sensitive-words|$(basename "$(cd .. && pwd)")/$(basename "$PWD")$terms"
+    hits=$(git grep -lIE -e "$terms" -- . ':!*-lock.*' 2>/dev/null | head -10 | oneline)
+    [ -n "$hits" ] && fail D8 "公开层不提私有内容" "$hits" || ok D8 "公开层不提私有内容"
+    [ -n "$(git config core.hooksPath)" ] && ok D8 "推送前扫描已启用" || fail D8 "推送前扫描已启用" "未设置 core.hooksPath → git config core.hooksPath ../review/hooks"
+  else
+    ok D8 "维护者层" "未在上级目录发现（贡献者环境正常）"
+  fi
+elif [ "$profile" = "maintainer" ]; then
+  [ -L CLAUDE.md ] && ok D8 "CLAUDE.md 软链" || warn D8 "CLAUDE.md 软链" "子目录启动时 @ 导入不一定生效 → ln -sf AGENTS.md CLAUDE.md"
+  bad=""; for d in */; do d=${d%/}; [ -d "$d/.git" ] || continue; git check-ignore -q "$d" || bad="$bad $d"; done
+  [ -n "$bad" ] && fail D8 "公开仓库已忽略" "未被 .gitignore 忽略:$bad" || ok D8 "公开仓库已忽略"
 fi
 
 echo

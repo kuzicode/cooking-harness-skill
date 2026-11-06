@@ -40,6 +40,7 @@ Create a small, vendor-neutral project harness so future AI sessions can start f
 - 技术栈关键字：`{{STACK}}`
 - owner：`{{OWNER}}`
 - 日期：`{{TODAY}}`，可用本地日期
+- 项目类型 `{{PROFILE}}`：`solo`（默认，个人或私有项目）或 `open-source`（公开仓库，外部贡献者会读它的 harness，维护者的路线和运维放上一级私有目录）。不确定就选 `solo`，以后可以升级
 - 是否需要独立架构文档 `architecture.md`？（单人项目通常不需要，架构知识可先落在 AGENTS.md 规则组里，长大后再拆）
 - 仓库可见性 `{{REPO_VISIBILITY}}`（公开 / 私有）与本地专用路径 `{{PRIVATE_PATHS}}`：**按内容敏感性隔离，不按目录整体隔离**。harness（`AGENTS.md` / `CLAUDE.md` / `docs/`）与部署逻辑默认入仓，换设备 clone 即可用；凭据、`.env*`、服务器清单（IP / SSH 账号 / 内部域名）放本地专用文件（如 `.env*`、`deploy/hosts.local`），由入仓脚本读取。公开仓库的文档与提交说明不写服务器地址；私有仓库可写，但改公开前先清理
 
@@ -60,7 +61,16 @@ Codex 下如果没有专用提问工具，直接用一段简短文字向用户�
 | `templates/docs/issues-archive.md` | `./docs/issues-archive.md` | 必选 |
 | `templates/docs/architecture.md` | `./docs/architecture.md` | Step 2 用户选了才生成 |
 
-Placeholder：`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`{{TODAY}}`、`{{REPO_VISIBILITY}}`（`公开` / `私有`）、`{{PRIVATE_PATHS}}`（反引号包裹、顿号分隔的路径列表；没有则写 `无`）。
+`open-source` 额外落地（`solo` 跳过）：
+
+| 模板 | 落地路径 |
+|---|---|
+| `templates/open-source/` 全部 | 项目根 |
+| `templates/maintainer/` 全部 | 上一级目录（私有仓库），`CLAUDE.md` 软链到 `AGENTS.md` |
+
+`open-source` 的裁剪：不生成 `docs/plan.md`、`docs/plan-archive.md`，路线放 `ROADMAP.md`；`AGENTS.md` 里 WF1 改成「先在 Issue 或 PR 描述写清」，导航和 CH2 指向 `ROADMAP.md`，加上模板 `open-source/redlines.md` 的 RL 规则组（按项目改写后删除该文件），删掉部署命令。上级目录 `.gitignore` 忽略项目目录，项目内执行 `git config core.hooksPath ../review/hooks`。详见 `references/profiles.md`。
+
+Placeholder：`{{PROFILE}}`、`{{PROJECT_NAME}}`、`{{TAGLINE}}`、`{{STACK}}`、`{{OWNER}}`、`{{TODAY}}`、`{{REPO_VISIBILITY}}`（`公开` / `私有`）、`{{PRIVATE_PATHS}}`（反引号包裹、顿号分隔的路径列表；没有则写 `无`）。
 
 写盘前的裁剪（模板噪音由 agent 在脚手架期消化，不留给用户）：
 

@@ -1,0 +1,8 @@
+# 公开项目是独立仓库
+/{{PROJECT_DIR}}/
+
+# 只留本机（HM6）
+ops/hosts.local
+review/sensitive-words.local
+.env*
+.DS_Store

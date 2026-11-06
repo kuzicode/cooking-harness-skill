@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# 公开仓库的推送前扫描：敏感词、私有路径、公网 IP、提交邮箱、gitleaks。任何一项不通过就拒绝推送。
+# 启用：git -C <公开项目> config core.hooksPath ../review/hooks
+# 只报告文件和行号，不回显命中的内容，避免敏感词进入终端和 agent 记录。
+set -uo pipefail
+HOOK_DIR=$(cd "$(dirname "$0")" && pwd)
+WORDS="$HOOK_DIR/../sensitive-words.local"
+EMPTY=$(git hash-object -t tree /dev/null)
+ZERO=0000000000000000000000000000000000000000
+FAIL=0
+fail() { echo "pre-push: $1" >&2; FAIL=1; }
+
+[ -s "$WORDS" ] || { echo "pre-push: 缺少敏感词表 $WORDS，拒绝推送" >&2; exit 1; }
+PRIVATE_RE='{{PRIVATE_RE}}'
+IP_RE='\b[0-9]{1,3}(\.[0-9]{1,3}){3}\b'
+IP_OK='^(127\.|0\.0\.0\.0|1\.2\.3\.4|10\.|192\.168\.)'
+
+scan_added() { # $1=base $2=tip
+  # 按文件扫描新增行，只输出 文件:新行号
+  git diff --unified=0 --no-color --no-ext-diff "$1" "$2" -- . ':(exclude)pnpm-lock.yaml' | python3 -c '
+import re,sys,subprocess
+words=[w.strip() for w in open(sys.argv[1],encoding="utf8") if w.strip() and not w.startswith("#")]
+priv=re.compile(sys.argv[2]); ip=re.compile(sys.argv[3]); ok=re.compile(sys.argv[4])
+f=None; n=0; bad=0
+for l in sys.stdin.buffer.read().decode("utf8","replace").splitlines():
+    if l.startswith("+++ "): f=l[4:]; continue
+    m=re.match(r"@@ -\S+ \+(\d+)",l)
+    if m: n=int(m.group(1)); continue
+    if l.startswith("+") and not l.startswith("+++"):
+        t=l[1:]; low=t.lower(); why=[]
+        if any(w.lower() in low for w in words): why.append("敏感词")
+        if priv.search(t): why.append("私有路径")
+        if not f.endswith(".svg") and " d=" not in t and any(not ok.match(x.group(0)) for x in ip.finditer(t)): why.append("IP")
+        if why: print(f"  {f}:{n} [{chr(44).join(why)}]",file=sys.stderr); bad=1
+        n+=1
+sys.exit(bad)
+' "$WORDS" "$PRIVATE_RE" "$IP_RE" "$IP_OK"
+}
+
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  [ "$local_sha" = "$ZERO" ] && continue
+  if [ "$remote_sha" = "$ZERO" ]; then BASE=$EMPTY; RANGE="$local_sha"; else BASE=$remote_sha; RANGE="$remote_sha..$local_sha"; fi
+  scan_added "$BASE" "$local_sha" || fail "新增内容命中规则（见上面的文件和行号）"
+  git log --format='%B%n%an%n%ae%n%cn%n%ce' "$RANGE" | python3 -c '
+import sys
+words=[w.strip().lower() for w in open(sys.argv[1],encoding="utf8") if w.strip() and not w.startswith("#")]
+t=sys.stdin.read().lower()
+sys.exit(1 if any(w in t for w in words) else 0)
+' "$WORDS" || fail "提交说明或作者信息命中敏感词"
+  BADMAIL=$(git log --format='%ae%n%ce' "$RANGE" | sort -u | grep -v '@users\.noreply\.github\.com$' | grep -v '^noreply@github\.com$' | wc -l | tr -d ' ')
+  [ "$BADMAIL" = 0 ] || fail "$BADMAIL 个提交邮箱不是 GitHub noreply"
+  if command -v gitleaks >/dev/null; then
+    gitleaks detect --source . --log-opts="$RANGE" --redact --no-banner >/dev/null 2>&1 || fail "gitleaks 发现疑似凭据"
+  elif docker info >/dev/null 2>&1; then
+    docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.24.3 detect --source /repo --log-opts="$RANGE" --redact --no-banner >/dev/null 2>&1 || fail "gitleaks 发现疑似凭据"
+  else
+    fail "没有 gitleaks，也没有运行中的 docker，无法扫描凭据"
+  fi
+done
+[ "$FAIL" = 0 ] || { echo "pre-push: 已拒绝推送" >&2; exit 1; }
+echo "pre-push: 通过"
